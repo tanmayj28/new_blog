@@ -1,79 +1,77 @@
 class ArticlesController < ApplicationController
   http_basic_authenticate_with name: "dhh", password: "secret", except: [:index, :show]
-#Controller is simply a class that inherits from ApplicationController.
-#Methods defined here will become actions for this controller.
   def index
-    @articles = Article.all
-  end
-
-  def show
-    if Article.find(params[:id])
-      respond_to do |format|
-       	format.json { render json: {article: @article}, status: :ok }
-       	format.html { @article= Article.find(params[:id]) }
+    respond_to do |format|
+      if @articles = Article.all
+        format.json { render json: {articles: @articles}, status: :ok }
+        format.html 
       end
-    else
-      respond_to do |format|
-        format.json { render json: {article: @article}, status: :unprocessable_entity }
-      end	
     end
   end
-
+  def show
+    respond_to do |format|
+      begin
+      	@article= Article.find(params[:id])
+        format.html { @article= Article.find(params[:id]) }
+        format.json { render json: {article: @article}, status: :ok }
+      rescue => e
+        format.json { render json: {error: e.message}, status: :unprocessable_entity }
+        format.html { render html: {error: e.message} }
+      end
+    end
+  end
   def new
     @article = Article.new
   end
-
   def edit
-    if Article.find(params[:id])
-      respond_to do |format|
-       	format.json { render json: {article: @article}, status: :ok }
+  	respond_to do |format|
+      begin @article = Article.find(params[:id])
        	format.html { @article = Article.find(params[:id]) }
-      end
-    else
-      respond_to do |format|
-        format.json { render json: {article: @article}, status: :unprocessable_entity }
-      end	
-    end
-  end
-
-  def create
-    @article = Article.new(article_params)
-   	if @article.save
-      respond_to do |format|
        	format.json { render json: {article: @article}, status: :ok }
-       	format.html { redirect_to @article }
+      rescue => e
+        format.json { render json: {error: e.message}, status: :unprocessable_entity }
+        format.html { render html: {error: e.message} }
       end
-   	else
-      respond_to do |format|
-        format.json { render json: {article: @article}, status: :unprocessable_entity }
+    end	
+  end
+  def create
+    respond_to do |format|
+      begin 
+        @article = Article.new(article_params)
+   	    @article.save
+        format.json { render json: {articles: @article}, status: :ok }
+       	format.html { redirect_to @article }
+      rescue => e
+        format.json { render json: {error: e.message}, status: :unprocessable_entity }
        	format.html { render 'new' }
       end
    	end
   end
-
   def update
-    @article = Article.find(params[:id])
-    if @article.update(article_params)
-	  redirect_to @article
-	else
-      render 'edit'
+    respond_to do |format|
+      begin 
+        @article = Article.find(params[:id])
+        @article.update(article_params)
+        format.json { render json: {article: @article}, status: :ok }
+        format.html { redirect_to @article }
+	    rescue => e
+        format.json { render json: {error: e.message}, status: :unprocessable_entity }
+        format.html { render 'edit' }
+	  end
 	end
   end
-
   def destroy
-    @article = Article.find(params[:id])
-	if @article.destroy
-	  respond_to do |format|
+   	respond_to do |format|
+	    begin 
+	  	  @article = Article.find(params[:id])
+	  	  @article.destroy
        	format.json { render json: {article: @article}, status: :ok }
        	format.html { redirect_to articles_path }
-      end
-    else
-      respond_to do |format|
+      rescue ActiveRecord::RecordNotFound
         format.json { render json: {article: @article}, status: :unprocessable_entity }
       end
-   	end
+    end
   end
-
   private
     def article_params
    	  params.require(:article).permit(:title, :text)
