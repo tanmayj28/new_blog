@@ -1,0 +1,12 @@
+<table>
+  <tr>
+	<th>Commenter</th>
+	<th>Comment</th>
+  </tr>
+  <% @comments.each do |comment| %>
+	<tr>
+	  <td><%= comment.commneter %></td>
+	  <td><%= comment.body %></td>
+	</tr>
+  <% end %>
+</table>

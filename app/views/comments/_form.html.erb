@@ -1,4 +1,4 @@
-<%= form_with(model: [ @article, @article.comments.build ]) do |form| %>
+<%= form_with(model: [@article.comments.build], local: true) do |form| %>
   <p>
     <%= form.label :commneter %><br>
     <%= form.text_field :commneter %>
@@ -7,6 +7,7 @@
     <%= form.label :body %><br>
     <%= form.text_area :body %>
   </p>  
+  <%= form.hidden_field :article_id, :value=>@article.id %>
   <p>
     <%= form.submit %>
   </p>
